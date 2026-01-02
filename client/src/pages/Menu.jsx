@@ -5,6 +5,23 @@ import api from '../utils/api';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Helper to get image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http')) return imagePath; // Already absolute
+
+  // In development, use relative path (proxied)
+  if (import.meta.env.DEV) {
+    return imagePath;
+  }
+
+  // In production, prepend backend URL
+  // Assumes VITE_API_URL is like 'https://backend.com/api' or 'https://backend.com'
+  const apiBase = import.meta.env.VITE_API_URL || '';
+  const domain = apiBase.replace(/\/api\/?$/, ''); // Remove trailing /api or /api/
+  return `${domain}${imagePath}`;
+};
+
 const Menu = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
@@ -145,11 +162,10 @@ const Menu = () => {
           <div ref={categoriesRef} className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12 px-2">
             <button
               onClick={() => setSelectedCategory('All')}
-              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 ${
-                selectedCategory === 'All'
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 ${selectedCategory === 'All'
                   ? 'bg-primary-orange text-white shadow-lg'
                   : 'bg-primary-black text-gray-300 hover:bg-primary-black/80 border border-gray-700'
-              }`}
+                }`}
             >
               All
             </button>
@@ -159,11 +175,10 @@ const Menu = () => {
                 <button
                   key={category._id || category.displayName}
                   onClick={() => setSelectedCategory(category.displayName)}
-                  className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 ${
-                    selectedCategory === category.displayName
+                  className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 ${selectedCategory === category.displayName
                       ? 'bg-primary-orange text-white shadow-lg'
                       : 'bg-primary-black text-gray-300 hover:bg-primary-black/80 border border-gray-700'
-                  }`}
+                    }`}
                 >
                   {category.displayName}
                 </button>
@@ -189,7 +204,7 @@ const Menu = () => {
                   <div className="relative h-48 sm:h-56 md:h-64 overflow-hidden">
                     {item.image ? (
                       <img
-                        src={`http://localhost:5000${item.image}`}
+                        src={getImageUrl(item.image)}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -240,4 +255,3 @@ const Menu = () => {
 };
 
 export default Menu;
-
